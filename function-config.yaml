@@ -1,0 +1,59 @@
+# Google Cloud Function Configuration
+# This file defines the configuration for the fiscal-code-api function
+
+name: fiscal-code-api
+runtime: python311
+region: europe-west1
+memory: 1024MB
+timeout: 540s
+max_instances: 100
+min_instances: 0
+
+# Entry point
+entry_point: fiscal_code_api
+source: .
+
+# HTTP trigger configuration
+trigger:
+  type: http
+  allow_unauthenticated: true
+
+# Environment variables
+environment_variables:
+  GOOGLE_CLOUD_FUNCTION: "1"
+  # CLERK_PUBLISHABLE_KEY: "pk_test_your_key_here"  # Uncomment and set if using authentication
+  # CLERK_SECRET_KEY: "sk_test_your_secret_here"    # Uncomment and set if using authentication
+
+# Resource configuration
+resources:
+  cpu: 1
+  memory: 1024Mi
+  
+# Scaling configuration
+scaling:
+  min_instances: 0
+  max_instances: 100
+  concurrent_requests: 1000
+
+# Network configuration
+network:
+  vpc_connector: ""
+  vpc_connector_egress: private-ranges-only
+
+# Labels
+labels:
+  app: fiscal-code-api
+  environment: production
+  framework: fastapi
+  language: python
+
+# Ingress settings
+ingress: all
+
+# Deployment configuration
+deployment:
+  build_environment_variables:
+    GOOGLE_BUILDPACK_CLEAR_CACHE: "false"
+  
+  # Service account (optional)
+  # service_account: your-service-account@your-project.iam.gserviceaccount.com

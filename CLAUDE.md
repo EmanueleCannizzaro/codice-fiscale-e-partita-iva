@@ -7,7 +7,6 @@ If the task was already initiate, the existing branch should be used.
 Create an issue on github in order to define a new branch. 
 The branch must be push on github.
 A request to the user must be raised before the branch is merged on main.
-
 ## Project Overview
 
 This is `python-codicefiscale`, a Python library for encoding/decoding Italian fiscal codes (Codice Fiscale). The library provides both a Python API and CLI interface for working with Italian tax codes.
@@ -214,3 +213,52 @@ Quick setup:
 - JWT signature verification is disabled for demo purposes (see `codicefiscale/auth.py:57`)
 - For production use, implement proper JWKS fetching and signature verification
 - Empty string environment variables are properly filtered out (fixed in recent updates)
+
+## Cloud Function Deployment
+
+This application can be deployed as a Google Cloud Function for serverless hosting:
+
+### Deployment Files
+- `main.py`: Google Cloud Function entry point using Functions Framework
+- `function-config.yaml`: Function configuration including runtime and resources
+- `deploy.sh`: Automated deployment script with comprehensive error handling
+- `requirements-cloudfunction.txt`: Cloud Function specific dependencies
+- `.gcloudignore`: Files to exclude from deployment
+- `.env.example`: Environment variable template
+- `CLOUD_FUNCTION_DEPLOYMENT.md`: Detailed deployment documentation
+
+### Quick Deployment
+```bash
+# Make deploy script executable
+chmod +x deploy.sh
+
+# Run deployment (will check prerequisites and guide you through setup)
+./deploy.sh
+
+# Test the deployed function
+python test-local.py
+```
+
+### Manual Deployment
+```bash
+# Deploy using gcloud CLI
+gcloud functions deploy python-codicefiscale-api \
+  --gen2 \
+  --runtime=python312 \
+  --region=us-central1 \
+  --source=. \
+  --entry-point=fiscal_code_api \
+  --trigger=http \
+  --allow-unauthenticated \
+  --memory=256MB \
+  --timeout=60s
+```
+
+### Environment Variables for Cloud Function
+Set these in the Google Cloud Console or via gcloud CLI:
+```bash
+gcloud functions deploy python-codicefiscale-api \
+  --set-env-vars CLERK_PUBLISHABLE_KEY=pk_test_xxx,CLERK_SECRET_KEY=sk_test_xxx
+```
+
+For complete deployment instructions, see [CLOUD_FUNCTION_DEPLOYMENT.md](CLOUD_FUNCTION_DEPLOYMENT.md).

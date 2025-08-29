@@ -1,0 +1,73 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.ruff_cache/
+
+# Development files
+.env
+.env.*
+*.log
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+
+# Documentation and examples
+README.md
+CHANGELOG.md
+AUTHENTICATION.md
+QUICK_AUTH_SETUP.md
+docs/
+images/
+*.md
+
+# Testing
+tests/
+test_*.py
+*_test.py
+tox.ini
+.pytest.ini
+
+# Build and distribution
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Node.js (if present)
+node_modules/
+package*.json
+
+# UV and pip
+uv.lock
+requirements.txt
+requirements-test.txt
+requirements-data.txt
+
+# Cloud Function specific - keep only what we need
+src/
+.github/
+scripts/
+python_codicefiscale.egg-info/
+setup.py
+MANIFEST.in

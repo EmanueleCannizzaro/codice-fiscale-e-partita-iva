@@ -31,14 +31,14 @@ jobs:
       - name: Run pre-commit
         continue-on-error: true
         run: |
-          pre-commit run --files src/codicefiscale/data/countries.json src/codicefiscale/data/municipalities.json
+          pre-commit run --files data/countries.json data/municipalities.json
 
       - name: Commit data
         uses: test-room-7/action-update-file@v2
         with:
           file-path: |
-            src/codicefiscale/data/countries.json
-            src/codicefiscale/data/municipalities.json
+            data/countries.json
+            data/municipalities.json
           commit-msg: "Updated `countries.json` and/or `municipalities.json` data."
           committer-name: "Fabio Caccamo [bot]"
           committer-email: "fabio.caccamo@gmail.com"

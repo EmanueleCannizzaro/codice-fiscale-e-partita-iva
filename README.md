@@ -18,6 +18,8 @@ python-codicefiscale is a library for encode/decode Italian fiscal code - **codi
 ![Codice Fiscale](https://user-images.githubusercontent.com/1035294/72058207-fa77dd80-32cf-11ea-8995-52324e7d3efe.png)
 
 ## Features
+- `NEW` **REST API** for web-based validation via FastAPI
+- `NEW` **VAT Number (Partita IVA)** validation and encoding
 - `NEW` **Auto-updated** data (once a week) directly from **ANPR** data-source.
 - `NEW` **Command Line Interface** available.
 - **Transliteration** for name/surname
@@ -26,7 +28,16 @@ python-codicefiscale is a library for encode/decode Italian fiscal code - **codi
 - **Omocodia** support
 
 ## Installation
-`pip install python-codicefiscale`
+
+### Basic Installation
+```bash
+pip install python-codicefiscale
+```
+
+### With FastAPI Support (for REST API)
+```bash
+pip install 'python-codicefiscale[api]'
+```
 
 ## Usage
 
@@ -95,6 +106,90 @@ codicefiscale.is_valid("CCCFBA85D03L219P")
 codicefiscale.is_omocode("CCCFBA85D03L219P")
 
 # False
+```
+
+#### VAT Number (Partita IVA) Support
+```python
+from codicefiscale.codicefiscale import partitaiva
+
+# Validate a VAT number
+partitaiva.is_valid("01234567890")
+# True
+
+# Generate VAT number from base 10 digits
+partitaiva.encode("0123456789")
+# "01234567890"
+
+# Decode VAT number
+partitaiva.decode("01234567890")
+# {
+#     "code": "01234567890",
+#     "valid": True,
+#     "base_number": "0123456789",
+#     "check_digit": "0",
+#     "calculated_check_digit": "0",
+# }
+```
+
+### REST API
+Start the FastAPI validation server:
+```bash
+python -m codicefiscale.__main_api__
+```
+
+The API will be available at `http://localhost:8000` with automatic documentation at `http://localhost:8000/docs`.
+
+#### Authentication
+The API supports optional Clerk authentication. To enable authentication:
+
+1. Set up a [Clerk](https://clerk.com) account and create an application
+2. Set the environment variable:
+   ```bash
+   export CLERK_PUBLISHABLE_KEY="pk_test_..."
+   ```
+3. Include the Bearer token in API requests:
+   ```bash
+   curl -H "Authorization: Bearer <your-clerk-jwt-token>" ...
+   ```
+
+**Note**: If `CLERK_PUBLISHABLE_KEY` is not set, the API runs without authentication (public access).
+
+#### API Endpoints
+
+**Fiscal Code Validation:**
+```bash
+# Without authentication (if disabled)
+curl -X POST "http://localhost:8000/fiscal-code/validate" \
+     -H "Content-Type: application/json" \
+     -d '{"code": "CCCFBA85D03L219P"}'
+
+# With Clerk authentication (if enabled)
+curl -X POST "http://localhost:8000/fiscal-code/validate" \
+     -H "Content-Type: application/json" \
+     -H "Authorization: Bearer <your-clerk-jwt-token>" \
+     -d '{"code": "CCCFBA85D03L219P"}'
+```
+
+**VAT Number Validation:**
+```bash
+curl -X POST "http://localhost:8000/vat/validate" \
+     -H "Content-Type: application/json" \
+     -H "Authorization: Bearer <your-clerk-jwt-token>" \
+     -d '{"partita_iva": "01234567890"}'
+```
+
+**Fiscal Code Generation:**
+```bash
+curl -X POST "http://localhost:8000/fiscal-code/encode" \
+     -H "Content-Type: application/json" \
+     -H "Authorization: Bearer <your-clerk-jwt-token>" \
+     -d '{
+       "lastname": "Caccamo",
+       "firstname": "Fabio", 
+       "gender": "M",
+       "birthdate": "03/04/1985",
+       "birthplace": "Torino"
+     }'
 ```
 
 ### Command Line
