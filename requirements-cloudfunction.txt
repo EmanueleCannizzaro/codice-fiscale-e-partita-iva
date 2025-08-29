@@ -1,0 +1,22 @@
+# Core dependencies
+python-dateutil>=2.8,<2.10
+python-fsutil>=0.10.0,<1.0.0
+python-slugify>=7.0.0,<9.0.0
+
+# FastAPI and web framework dependencies
+fastapi>=0.100.0,<1.0.0
+uvicorn>=0.20.0,<1.0.0
+jinja2>=3.1.0,<4.0.0
+python-multipart>=0.0.6,<1.0.0
+
+# Authentication dependencies
+pyjwt[crypto]>=2.8.0,<3.0.0
+cryptography>=41.0.0,<43.0.0
+python-dotenv>=1.0.0,<2.0.0
+
+# Google Cloud Functions dependencies
+functions-framework>=3.0.0,<4.0.0
+mangum>=0.17.0,<1.0.0
+
+# Additional dependencies for Cloud Functions
+gunicorn>=21.0.0,<22.0.0

@@ -14,7 +14,7 @@ class TestPartitaIVA:
             "12345678901",  # Another example
             "00000000000",  # All zeros (mathematically valid)
         ]
-        
+
         for vat in valid_vat_numbers:
             # First calculate what the actual check digit should be
             calculated = partitaiva._calculate_check_digit(vat[:10])
@@ -32,7 +32,7 @@ class TestPartitaIVA:
             None,  # None value
             "12 34 56 78 90 1",  # With spaces but wrong check digit
         ]
-        
+
         for vat in invalid_vat_numbers:
             assert not partitaiva.is_valid(vat), f"VAT {vat} should be invalid"
 
@@ -44,7 +44,7 @@ class TestPartitaIVA:
             ("9876543210", "3"),
             ("0000000000", "0"),
         ]
-        
+
         for base_number, expected_check in test_cases:
             calculated = partitaiva._calculate_check_digit(base_number)
             assert calculated == expected_check, f"Check digit for {base_number} should be {expected_check}, got {calculated}"
@@ -53,10 +53,10 @@ class TestPartitaIVA:
         """Test check digit calculation with invalid input."""
         with pytest.raises(ValueError):
             partitaiva._calculate_check_digit("123456789")  # Too short
-            
+
         with pytest.raises(ValueError):
             partitaiva._calculate_check_digit("12345678901")  # Too long
-            
+
         with pytest.raises(ValueError):
             partitaiva._calculate_check_digit("123456789A")  # Contains letter
 
@@ -68,8 +68,8 @@ class TestPartitaIVA:
             ("9876543210", "98765432103"),
             ("0000000000", "00000000000"),
         ]
-        
-        for base_number, expected_full in test_cases:
+
+        for base_number, _expected_full in test_cases:
             encoded = partitaiva.encode(base_number)
             assert len(encoded) == 11, "Encoded VAT should be 11 digits"
             assert encoded.startswith(base_number), "Encoded VAT should start with base number"
@@ -82,10 +82,10 @@ class TestPartitaIVA:
         """Test encoding with invalid input."""
         with pytest.raises(ValueError):
             partitaiva.encode("123456789")  # Too short
-            
+
         with pytest.raises(ValueError):
             partitaiva.encode("12345678901")  # Too long
-            
+
         with pytest.raises(ValueError):
             partitaiva.encode("123456789A")  # Contains letter
 
@@ -94,9 +94,9 @@ class TestPartitaIVA:
         # Test with valid VAT number
         base_num = "0123456789"
         full_vat = partitaiva.encode(base_num)
-        
+
         result = partitaiva.decode(full_vat)
-        
+
         assert result["code"] == full_vat
         assert result["valid"] is True
         assert result["base_number"] == base_num
@@ -113,7 +113,7 @@ class TestPartitaIVA:
             "12345678999",  # Wrong check digit
             None,  # None value
         ]
-        
+
         for invalid_vat in invalid_cases:
             result = partitaiva.decode(invalid_vat)
             assert result["valid"] is False
@@ -131,7 +131,7 @@ class TestPartitaIVA:
         base_num = "0123456789"
         full_vat = partitaiva.encode(base_num)
         spaced_vat = f"{full_vat[:2]} {full_vat[2:5]} {full_vat[5:8]} {full_vat[8:]}"
-        
+
         result = partitaiva.decode(spaced_vat)
         assert result["valid"] is True
         assert result["base_number"] == base_num
@@ -139,16 +139,17 @@ class TestPartitaIVA:
     def test_integration_encode_decode(self):
         """Test encoding and then decoding produces consistent results."""
         base_numbers = ["0123456789", "9876543210", "5555555555", "0000000000"]
-        
+
         for base_num in base_numbers:
             # Encode
             encoded_vat = partitaiva.encode(base_num)
-            
+
             # Validate
             assert partitaiva.is_valid(encoded_vat)
-            
+
             # Decode
             decoded = partitaiva.decode(encoded_vat)
             assert decoded["valid"] is True
             assert decoded["base_number"] == base_num
             assert decoded["code"] == encoded_vat
+

@@ -47,6 +47,11 @@ maintainers = [
 api = [
     "fastapi >= 0.100.0, < 1.0.0",
     "uvicorn >= 0.20.0, < 1.0.0",
+    "pyjwt[crypto] >= 2.8.0, < 3.0.0",
+    "cryptography >= 41.0.0, < 43.0.0",
+    "python-dotenv >= 1.0.0, < 2.0.0",
+    "jinja2 >= 3.1.0, < 4.0.0",
+    "python-multipart >= 0.0.6, < 1.0.0",
 ]
 
 [project.readme]
@@ -84,28 +89,52 @@ exclude = '''
 '''
 
 [tool.mypy]
-files = ["src"]
+files = ["codicefiscale"]
 ignore_missing_imports = true
 install_types = true
 non_interactive = true
 strict = true
 
 [tool.pytest.ini_options]
-pythonpath = "src"
+pythonpath = "."
 testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 88
+target-version = "py310"
+src = ["codicefiscale", "tests"]
 
 [tool.ruff.lint]
-ignore = []
-select = ["B", "B9", "C", "E", "F", "I", "W"]
+select = [
+    "B",    # flake8-bugbear
+    "B9",   # flake8-bugbear opinionated
+    "C",    # mccabe
+    "E",    # pycodestyle errors
+    "F",    # pyflakes
+    "I",    # isort
+    "W",    # pycodestyle warnings
+    "UP",   # pyupgrade
+    "RUF",  # ruff-specific rules
+    "SIM",  # flake8-simplify
+    "TCH",  # flake8-type-checking
+]
+ignore = [
+    "E501",  # line too long (handled by formatter)
+]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 10
 
+[tool.ruff.lint.isort]
+known-first-party = ["codicefiscale"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
 [tool.setuptools]
-package-dir = {"" = "src"}
 packages = ["codicefiscale"]
 
 [tool.setuptools.dynamic.version]
@@ -117,5 +146,6 @@ dev = [
     "httpx>=0.28.1",
     "pytest==8.4.*",
     "pytest-cov==6.2.*",
+    "ruff>=0.7.0",
     "uvicorn>=0.35.0",
 ]
