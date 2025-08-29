@@ -15,3 +15,16 @@ __all__ = [
     "__title__",
     "__version__",
 ]
+
+# Import new modules to make them available
+try:
+    from . import partitaiva
+    __all__.append("partitaiva")
+except ImportError:
+    pass
+
+try:
+    from . import api
+    __all__.append("api")
+except ImportError:
+    pass
