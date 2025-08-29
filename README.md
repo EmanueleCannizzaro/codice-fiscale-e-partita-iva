@@ -134,17 +134,39 @@ partitaiva.decode("01234567890")
 ### REST API
 Start the FastAPI validation server:
 ```bash
-python -m codicefiscale.codicefiscale.__main_api__
+python -m codicefiscale.__main_api__
 ```
 
 The API will be available at `http://localhost:8000` with automatic documentation at `http://localhost:8000/docs`.
+
+#### Authentication
+The API supports optional Clerk authentication. To enable authentication:
+
+1. Set up a [Clerk](https://clerk.com) account and create an application
+2. Set the environment variable:
+   ```bash
+   export CLERK_PUBLISHABLE_KEY="pk_test_..."
+   ```
+3. Include the Bearer token in API requests:
+   ```bash
+   curl -H "Authorization: Bearer <your-clerk-jwt-token>" ...
+   ```
+
+**Note**: If `CLERK_PUBLISHABLE_KEY` is not set, the API runs without authentication (public access).
 
 #### API Endpoints
 
 **Fiscal Code Validation:**
 ```bash
+# Without authentication (if disabled)
 curl -X POST "http://localhost:8000/fiscal-code/validate" \
      -H "Content-Type: application/json" \
+     -d '{"code": "CCCFBA85D03L219P"}'
+
+# With Clerk authentication (if enabled)
+curl -X POST "http://localhost:8000/fiscal-code/validate" \
+     -H "Content-Type: application/json" \
+     -H "Authorization: Bearer <your-clerk-jwt-token>" \
      -d '{"code": "CCCFBA85D03L219P"}'
 ```
 
@@ -152,6 +174,7 @@ curl -X POST "http://localhost:8000/fiscal-code/validate" \
 ```bash
 curl -X POST "http://localhost:8000/vat/validate" \
      -H "Content-Type: application/json" \
+     -H "Authorization: Bearer <your-clerk-jwt-token>" \
      -d '{"partita_iva": "01234567890"}'
 ```
 
@@ -159,6 +182,7 @@ curl -X POST "http://localhost:8000/vat/validate" \
 ```bash
 curl -X POST "http://localhost:8000/fiscal-code/encode" \
      -H "Content-Type: application/json" \
+     -H "Authorization: Bearer <your-clerk-jwt-token>" \
      -d '{
        "lastname": "Caccamo",
        "firstname": "Fabio", 
