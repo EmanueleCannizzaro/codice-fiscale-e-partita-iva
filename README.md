@@ -276,3 +276,4 @@ Released under [MIT License](LICENSE.txt).
 - [`python-fontbro`](https://github.com/fabiocaccamo/python-fontbro) - friendly font operations. 🧢
 
 - [`python-fsutil`](https://github.com/fabiocaccamo/python-fsutil) - file-system utilities for lazy devs. 🧟‍♂️
+✅ Project cleaned up and all branches merged
