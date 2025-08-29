@@ -19,6 +19,7 @@ python-codicefiscale is a library for encode/decode Italian fiscal code - **codi
 
 ## Features
 - `NEW` **REST API** for web-based validation via FastAPI
+- `NEW` **JWT Token Generator** for easy API testing with Clerk authentication
 - `NEW` **VAT Number (Partita IVA)** validation and encoding
 - `NEW` **Auto-updated** data (once a week) directly from **ANPR** data-source.
 - `NEW` **Command Line Interface** available.
@@ -38,6 +39,30 @@ pip install python-codicefiscale
 ```bash
 pip install 'python-codicefiscale[api]'
 ```
+
+## 🚀 Quick Start for New Users
+
+### Development Setup (API Testing)
+```bash
+# 1. Clone and install
+git clone https://github.com/fabiocaccamo/python-codicefiscale.git
+cd python-codicefiscale
+pip install uv && uv sync
+
+# 2. Setup JWT token generation for API testing
+cd frontend && npm install && npm run setup
+
+# 3. Start API server and test
+cd .. && uv run python -m codicefiscale.__main_api__ &
+cd frontend && npm run test-api
+```
+
+The setup script will guide you through:
+- ✅ Configuring Clerk authentication (or disabling it for simple testing)
+- ✅ Generating JWT tokens for API access
+- ✅ Testing all API endpoints
+
+**For complete setup instructions:** See [NEW_USER_SETUP.md](NEW_USER_SETUP.md)
 
 ## Usage
 

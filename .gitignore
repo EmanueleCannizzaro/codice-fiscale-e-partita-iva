@@ -125,3 +125,4 @@ dmypy.json
 # custom
 TODO.txt
 test-coverage.sh
+frontend/node_modules/

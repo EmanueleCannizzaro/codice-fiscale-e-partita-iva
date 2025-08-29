@@ -60,11 +60,11 @@ package*.json
 
 # UV and pip
 uv.lock
-requirements.txt
+#requirements.txt
 requirements-test.txt
 requirements-data.txt
 
-# Cloud Function specific - keep only what we need
+# Cloud Run specific - exclude development files
 src/
 .github/
 scripts/

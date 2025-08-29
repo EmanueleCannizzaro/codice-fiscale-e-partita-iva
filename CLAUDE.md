@@ -11,6 +11,17 @@ A request to the user must be raised before the branch is merged on main.
 
 This is `python-codicefiscale`, a Python library for encoding/decoding Italian fiscal codes (Codice Fiscale). The library provides both a Python API and CLI interface for working with Italian tax codes.
 
+### Project Structure
+```
+python-codicefiscale/
+├── codicefiscale/              # Main Python library
+├── frontend/                   # Node.js JWT token generator for testing
+├── tests/                      # Python test suite
+├── data/                       # Municipality and country data
+├── scripts/                    # Data update scripts
+└── deploy-cloudrun.sh           # Google Cloud Run deployment
+```
+
 ## Development Commands
 
 ### Testing
@@ -71,6 +82,24 @@ python -m codicefiscale.__main_api__
 uvicorn codicefiscale.app:app --host 0.0.0.0 --port 8000 --reload
 ```
 
+### Frontend Tools (JWT Token Generation)
+```bash
+# Navigate to frontend directory
+cd frontend
+
+# Install Node.js dependencies
+npm install
+
+# Generate Clerk JWT token for testing
+npm run token
+
+# Test all API endpoints with authentication
+npm run test-api
+
+# Interactive API testing
+node test-api.js --interactive
+```
+
 ### Package Management
 This project uses `uv` for dependency management:
 ```bash
@@ -99,9 +128,16 @@ uv run python -m codicefiscale.__main_api__
 - `codicefiscale/metadata.py`: Package metadata and version information
 
 ### FastAPI Web Application (Optional)
-- `codicefiscale/app.py`: REST API server with validation endpoints
+- `codicefiscale/app.py`: Unified REST API server with validation endpoints (works in both development and cloud environments)
 - `codicefiscale/auth.py`: Clerk authentication integration for API security
-- `codicefiscale/__main_api__.py`: API server entry point
+- `codicefiscale/__main_api__.py`: API server entry point for local development
+
+### Frontend Tools (Node.js)
+- `frontend/generate-token.js`: Clerk JWT token generator for testing
+- `frontend/test-api.js`: Comprehensive API testing suite with interactive mode
+- `frontend/test-example.js`: Usage examples and demonstrations
+- `frontend/package.json`: Node.js dependencies and scripts
+- `frontend/README.md`: Frontend-specific documentation
 
 ### Key Features
 - **Fiscal Code Support**: Complete encoding/decoding with omocodia handling
@@ -214,51 +250,50 @@ Quick setup:
 - For production use, implement proper JWKS fetching and signature verification
 - Empty string environment variables are properly filtered out (fixed in recent updates)
 
-## Cloud Function Deployment
+## Cloud Run Deployment
 
-This application can be deployed as a Google Cloud Function for serverless hosting:
+This application can be deployed to Google Cloud Run for serverless hosting:
 
 ### Deployment Files
-- `main.py`: Google Cloud Function entry point using Functions Framework
-- `function-config.yaml`: Function configuration including runtime and resources
-- `deploy.sh`: Automated deployment script with comprehensive error handling
-- `requirements-cloudfunction.txt`: Cloud Function specific dependencies
+- `main-cloudrun.py`: Cloud Run entry point for direct FastAPI deployment
+- `deploy-cloudrun.sh`: Automated Cloud Run deployment script
+- `requirements.txt`: Generated deployment dependencies
 - `.gcloudignore`: Files to exclude from deployment
-- `.env.example`: Environment variable template
-- `CLOUD_FUNCTION_DEPLOYMENT.md`: Detailed deployment documentation
 
 ### Quick Deployment
 ```bash
 # Make deploy script executable
-chmod +x deploy.sh
+chmod +x deploy-cloudrun.sh
 
 # Run deployment (will check prerequisites and guide you through setup)
-./deploy.sh
+./deploy-cloudrun.sh -p YOUR_PROJECT_ID -r europe-west1
 
-# Test the deployed function
-python test-local.py
+# The script will automatically:
+# - Generate requirements.txt if needed
+# - Enable required APIs
+# - Build and deploy to Cloud Run
+# - Test the deployment
 ```
 
 ### Manual Deployment
 ```bash
 # Deploy using gcloud CLI
-gcloud functions deploy python-codicefiscale-api \
-  --gen2 \
-  --runtime=python312 \
-  --region=us-central1 \
-  --source=. \
-  --entry-point=fiscal_code_api \
-  --trigger=http \
+gcloud run deploy codice-fiscale-service \
+  --source . \
+  --region europe-west1 \
+  --memory 1Gi \
+  --cpu 1 \
+  --max-instances 100 \
+  --min-instances 0 \
   --allow-unauthenticated \
-  --memory=256MB \
-  --timeout=60s
+  --set-env-vars GOOGLE_CLOUD_FUNCTION=1
 ```
 
-### Environment Variables for Cloud Function
-Set these in the Google Cloud Console or via gcloud CLI:
+### Environment Variables for Cloud Run
+Set authentication variables if needed:
 ```bash
-gcloud functions deploy python-codicefiscale-api \
+gcloud run deploy codice-fiscale-service \
   --set-env-vars CLERK_PUBLISHABLE_KEY=pk_test_xxx,CLERK_SECRET_KEY=sk_test_xxx
 ```
 
-For complete deployment instructions, see [CLOUD_FUNCTION_DEPLOYMENT.md](CLOUD_FUNCTION_DEPLOYMENT.md).
+For deployment guidance, see [CLOUD_RUN_SOLUTION.md](CLOUD_RUN_SOLUTION.md) and [DEPLOYMENT_COMMAND_GUIDE.md](DEPLOYMENT_COMMAND_GUIDE.md).

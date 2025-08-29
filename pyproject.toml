@@ -33,9 +33,17 @@ classifiers = [
     "Topic :: Software Development :: Build Tools",
 ]
 dependencies = [
+    "cryptography>=42.0.8",
+    "fastapi>=0.116.1",
+    "functions-framework>=3.9.2",
+    "jinja2>=3.1.6",
+    "pyjwt[crypto]>=2.10.1",
     "python-dateutil >= 2.8, < 2.10",
+    "python-dotenv>=1.1.1",
     "python-fsutil >= 0.10.0, < 1.0.0",
+    "python-multipart>=0.0.20",
     "python-slugify >= 7.0.0, < 9.0.0",
+    "uvicorn>=0.35.0",
 ]
 
 dynamic = ["version"]

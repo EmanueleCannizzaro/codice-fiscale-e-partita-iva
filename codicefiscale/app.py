@@ -1,9 +1,19 @@
+"""
+FastAPI application for Italian fiscal code and VAT number validation.
+
+This module creates a FastAPI app that works in both development and cloud environments.
+"""
+
 from __future__ import annotations
 
 import os
-from typing import Any, Optional
+from typing import Any
+
+# Check if we're running in a cloud environment
+IS_CLOUD_DEPLOYMENT = os.getenv('GOOGLE_CLOUD_FUNCTION', '').lower() == '1'
 
 try:
+    from contextlib import asynccontextmanager
     from dotenv import load_dotenv
     from fastapi import Depends, FastAPI, HTTPException, Request
     from fastapi.responses import JSONResponse, HTMLResponse
@@ -11,8 +21,10 @@ try:
     from fastapi.templating import Jinja2Templates
     from pydantic import BaseModel, Field
     
-    # Load environment variables from .env file
-    load_dotenv()
+    # Only load .env in local development, not in cloud deployments
+    if not IS_CLOUD_DEPLOYMENT:
+        load_dotenv()
+        
 except ImportError as e:
     raise ImportError(
         "FastAPI dependencies not installed. "
@@ -36,14 +48,38 @@ if AUTH_ENABLED:
     except (ImportError, ValueError):
         AUTH_ENABLED = False
 
+# Build description based on environment
 description = "REST API for validating Italian fiscal codes (Codice Fiscale) and VAT numbers (Partita IVA)"
 if AUTH_ENABLED:
     description += "\n\n**Authentication**: This API uses Clerk authentication. Include your Bearer token in the Authorization header."
 
+if IS_CLOUD_DEPLOYMENT:
+    description += "\n\n**Deployed on**: Google Cloud Run"
+
+# Application lifespan handler
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan handler."""
+    # Startup
+    if IS_CLOUD_DEPLOYMENT:
+        print(f"🚀 Starting Italian Fiscal Code API on Google Cloud Run")
+        print(f"📊 Authentication: {'Enabled' if AUTH_ENABLED else 'Disabled'}")
+    else:
+        print(f"🚀 Starting Italian Fiscal Code API in development mode")
+    
+    yield
+    
+    # Shutdown (if needed)
+    pass
+
+# FastAPI app initialization
 app = FastAPI(
     title="Italian Fiscal Code and VAT Number Validation API",
     description=description,
     version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc",
+    lifespan=lifespan
 )
 
 # Template setup
@@ -51,11 +87,11 @@ from pathlib import Path
 templates_dir = Path(__file__).parent / "templates"
 static_dir = Path(__file__).parent / "static"
 
-# Only mount static files if the directory exists
-if static_dir.exists():
+# For cloud deployments, we might not have static files
+if not IS_CLOUD_DEPLOYMENT and static_dir.exists():
     app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
-# Only setup templates if the directory exists
+# Setup templates if available
 templates = None
 if templates_dir.exists():
     templates = Jinja2Templates(directory=templates_dir)
@@ -100,13 +136,14 @@ else:
     optional_auth_dependency = Depends(no_auth)
 
 
-@app.get("/", response_class=HTMLResponse)
-async def web_interface(request: Request, auth_data: dict[str, Any] = optional_auth_dependency):
-    """Web interface for fiscal code and VAT validation."""
-    if templates is None:
-        # Fallback to JSON response if templates not available
+@app.get("/", response_class=HTMLResponse if templates and not IS_CLOUD_DEPLOYMENT else JSONResponse)
+async def root(request: Request = None, auth_data: dict[str, Any] = optional_auth_dependency):
+    """Root endpoint - web interface in development, API info in cloud deployments."""
+    # In cloud deployments, prioritize JSON API response
+    if IS_CLOUD_DEPLOYMENT or templates is None:
         return await api_info(auth_data)
     
+    # In development, show web interface
     user_info = None
     if AUTH_ENABLED and auth_data and "sub" in auth_data:
         user_info = get_user_metadata(auth_data)
@@ -123,6 +160,7 @@ async def api_info(auth_data: dict[str, Any] = optional_auth_dependency):
     response = {
         "name": "Italian Fiscal Code and VAT Number Validation API",
         "version": "1.0.0",
+        "environment": "Google Cloud Run" if IS_CLOUD_DEPLOYMENT else "Development",
         "authentication": {
             "enabled": AUTH_ENABLED,
             "type": "Clerk JWT Bearer Token" if AUTH_ENABLED else "None",
@@ -240,13 +278,27 @@ async def decode_vat(
         raise HTTPException(status_code=400, detail=str(e)) from e
 
 
-# Health check endpoint
+# Health check endpoint - always available
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
-    return {"status": "healthy"}
+    health_info = {
+        "status": "healthy",
+        "environment": "Google Cloud Run" if IS_CLOUD_DEPLOYMENT else "Development",
+        "authentication_enabled": AUTH_ENABLED
+    }
+    
+    if IS_CLOUD_DEPLOYMENT:
+        # Add cloud-specific health info
+        health_info["service_name"] = os.getenv("K_SERVICE", "codice-fiscale-service")
+        health_info["service_revision"] = os.getenv("K_REVISION", "unknown")
+    
+    return health_info
 
 
+
+
+# For local development
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
